@@ -13,7 +13,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   :root {
     --bg: #FAFAF8; --ink: #2B2B28; --sub: #8A8578; --line: #EAE7DD;
-    --card: #FFFFFF; --accent: #C97B4A; --muted: #9C9A8E;
+    --card: #FFFFFF; --accent: #F5821F; --accent-soft: #FFF1E6; --muted: #9C9A8E;
   }
   html, body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--ink); background: var(--bg); }
   body { min-height: 100vh; padding-bottom: 150px; }
@@ -24,16 +24,25 @@
   .title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
   .title-sm { font-size: 22px; font-weight: 700; }
   .subtitle { font-size: 13px; color: #71705f; margin-top: 4px; }
+  .refresh-btn { border: 1px solid var(--line); background: var(--card); border-radius: 50%; width: 40px; height: 40px;
+    font-size: 18px; color: var(--accent); cursor: pointer; font-family: inherit; display: flex; align-items: center;
+    justify-content: center; padding: 0; }
+  .refresh-btn:active { transform: rotate(180deg); transition: transform 0.4s; }
 
   .main { padding: 8px 24px 24px; }
   .section + .section { margin-top: 28px; }
-  .section-label { font-size: 13px; font-weight: 600; color: var(--sub); margin-bottom: 10px; }
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .section-label { font-size: 13px; font-weight: 600; color: var(--sub); }
   .track-list { display: flex; flex-direction: column; gap: 8px; }
 
   .track-row { display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left;
-    border: none; background: var(--card); border-radius: 14px; padding: 18px 16px; cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-family: inherit; }
-  .track-row.active { background: rgba(43,43,40,0.06); }
+    border: none; background: var(--card); border-radius: 14px; padding: 14px 16px; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-family: inherit; gap: 12px; }
+  .track-row.active { background: rgba(245,130,31,0.10); }
+  .track-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+  .track-ic { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .track-row.active .track-ic { background: var(--accent); color: #fff; }
   .track-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .track-title { font-size: 15px; font-weight: 600; color: var(--ink); }
   .track-artist { font-size: 12px; color: var(--sub); }
@@ -52,7 +61,7 @@
   .search-row { display: flex; align-items: center; gap: 8px; }
   .search-row-main { flex: 1; display: flex; text-align: left; border: none; background: var(--card);
     border-radius: 14px; padding: 16px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-width: 0; font-family: inherit; }
-  .search-row-main.active { background: rgba(43,43,40,0.06); }
+  .search-row-main.active { background: rgba(245,130,31,0.10); }
   .add-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--card);
     font-size: 20px; color: var(--ink); cursor: pointer; flex-shrink: 0; }
   .add-wrap { position: relative; }
@@ -78,14 +87,14 @@
   .row-with-delete { display: flex; align-items: center; gap: 8px; }
   .row-inner { flex: 1; display: flex; text-align: left; border: none; background: var(--card); border-radius: 14px;
     padding: 18px 16px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-width: 0; font-family: inherit; }
-  .row-inner.active { background: rgba(43,43,40,0.06); }
+  .row-inner.active { background: rgba(245,130,31,0.10); }
   .del-btn { border: none; background: none; color: #B0563D; font-size: 12px; font-weight: 600; cursor: pointer;
     flex-shrink: 0; padding: 10px; font-family: inherit; }
   .del-list-btn { width: 100%; border: none; background: none; color: #B0563D; font-size: 13px; font-weight: 600;
     cursor: pointer; margin-top: 18px; padding: 10px; font-family: inherit; }
 
   .player-bar { position: fixed; bottom: 72px; left: 0; right: 0; background: rgba(255,255,255,0.94);
-    backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+    backdrop-filter: blur(12px); border-top: 1px solid var(--line); cursor: pointer; }
   .progress-track { height: 3px; background: var(--line); position: relative; }
   .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); transition: width 0.3s linear; }
   .player-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 18px; }
@@ -93,7 +102,7 @@
   .now-artist { font-size: 11px; color: var(--sub); }
   .controls { display: flex; align-items: center; gap: 16px; }
   .ctrl { border: none; background: none; font-size: 20px; cursor: pointer; color: var(--ink); }
-  .ctrl-main { border: none; background: var(--ink); color: var(--bg); width: 44px; height: 44px; border-radius: 50%;
+  .ctrl-main { border: none; background: var(--accent); color: #fff; width: 44px; height: 44px; border-radius: 50%;
     font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
   .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 72px; background: var(--card);
@@ -103,14 +112,49 @@
   .bottom-nav button.on { color: var(--ink); font-weight: 700; }
 
   .toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); background: var(--ink);
-    color: var(--bg); font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 20px; z-index: 50;
+    color: var(--bg); font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 20px; z-index: 80;
     opacity: 0; transition: opacity 0.25s; pointer-events: none; }
   .toast.show { opacity: 1; }
 
-  .api-warn { margin: 16px 24px; padding: 14px 16px; background: #FBEEE6; border: 1px solid #EBC9B3;
-    border-radius: 12px; font-size: 12px; color: #8A4B2A; line-height: 1.6; }
   .loading { font-size: 13px; color: var(--sub); padding: 24px 0; text-align: center; }
-  .hidden { display: none; }
+
+  /* 큰 재생 화면 */
+  .np-screen { position: fixed; inset: 0; background: var(--bg); z-index: 60; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+  .np-screen.open { transform: translateY(0); }
+  .np-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 8px; }
+  .np-close { border: none; background: none; font-size: 26px; color: var(--ink); cursor: pointer; line-height: 1; }
+  .np-top-label { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: var(--sub); }
+  .np-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0 32px; overflow-y: auto; }
+  .np-art { width: 100%; max-width: 320px; aspect-ratio: 1/1; border-radius: 24px; overflow: hidden;
+    background: #E8E5DC; box-shadow: 0 12px 40px rgba(0,0,0,0.16); display: flex; align-items: center; justify-content: center; }
+  .np-art img { width: 100%; height: 100%; object-fit: cover; }
+  .np-art .np-art-fallback { font-size: 64px; color: #C9C5B8; }
+  .np-meta { width: 100%; max-width: 320px; margin-top: 28px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .np-song { font-size: 20px; font-weight: 700; line-height: 1.3; }
+  .np-singer { font-size: 14px; color: var(--sub); margin-top: 4px; }
+  .np-like { border: none; background: none; cursor: pointer; font-size: 24px; flex-shrink: 0; padding: 2px; line-height: 1; }
+
+  .np-progress { width: 100%; max-width: 320px; margin-top: 24px; }
+  .np-bar { height: 4px; background: var(--line); border-radius: 2px; position: relative; cursor: pointer; }
+  .np-bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 2px; }
+  .np-bar-knob { position: absolute; top: 50%; width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
+    transform: translate(-50%, -50%); }
+  .np-time { display: flex; justify-content: space-between; font-size: 11px; color: var(--sub); margin-top: 8px; }
+
+  .np-controls { width: 100%; max-width: 320px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+  .np-cbtn { border: none; background: none; cursor: pointer; color: var(--ink); display: flex; align-items: center; justify-content: center; }
+  .np-cbtn.side { font-size: 22px; color: var(--sub); }
+  .np-cbtn.skip { font-size: 28px; }
+  .np-play { width: 68px; height: 68px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 24px;
+    box-shadow: 0 8px 20px rgba(245,130,31,0.35); }
+  .np-cbtn.on { color: var(--accent); }
+
+  .np-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 40px; margin-top: 28px; width: 100%; max-width: 320px; }
+  .np-wave span { width: 3px; background: var(--accent); border-radius: 2px; opacity: 0.45; }
+  .np-wave.playing span { animation: wave 1s ease-in-out infinite; opacity: 0.85; }
+  @keyframes wave { 0%,100% { height: 8px; } 50% { height: 32px; } }
 </style>
 </head>
 <body>
@@ -122,125 +166,130 @@
     <div class="brand">SOM2MUSIC</div>
     <div id="header-content"></div>
   </div>
+  <div id="header-action"></div>
 </header>
 
 <main class="main" id="main"></main>
-
 <div id="player-bar"></div>
-
 <nav class="bottom-nav" id="bottom-nav"></nav>
+<div class="np-screen" id="np-screen"></div>
 
 <script>
-/* ============================================================
-   SOM2MUSIC — 설정
-   ============================================================ */
-
 // ⬇⬇⬇ 여기에 본인의 YouTube Data API 키를 붙여넣으세요 ⬇⬇⬇
 const YOUTUBE_API_KEY = "AIzaSyByOiNtafI7cRU-rJH39d3AcYOdwWcTnVY";
 // ⬆⬆⬆ 예: const YOUTUBE_API_KEY = "AIzaSyB1a2c3..."; ⬆⬆⬆
 
-/* ============================================================ */
-
-const WEATHER_PRESETS = [
-  { key: 'sunny',  label: '맑음', emoji: '\u2600\uFE0F', tint: '#F4D58D', text: '햇살 좋은 날엔 가볍게', q: '신나는 팝송' },
-  { key: 'cloudy', label: '흐림', emoji: '\u2601\uFE0F', tint: '#B8C4CE', text: '흐린 하늘엔 잔잔하게', q: '잔잔한 어쿠스틱' },
-  { key: 'rainy',  label: '비',   emoji: '\uD83C\uDF27\uFE0F', tint: '#7E94A8', text: '비 오는 날엔 차분하게', q: '비 오는 날 발라드' },
-];
+const MOOD_BY_TIME = {
+  morning: { label: '맑은 아침', emoji: '\u2600\uFE0F', tint: '#F4D58D',
+    queries: ['상쾌한 아침 팝송', '기분 좋은 시티팝', '경쾌한 어쿠스틱', '활기찬 인디팝', '산뜻한 보사노바'] },
+  evening: { label: '노을', emoji: '\uD83C\uDF06', tint: '#E8A87C',
+    queries: ['감성 알앤비', '잔잔한 인디', '편안한 재즈', '노을 발라드', '로파이 힙합'] },
+  night: { label: '밤', emoji: '\uD83C\uDF19', tint: '#7E94A8',
+    queries: ['차분한 발라드', '몽환적인 시티팝', '잔잔한 피아노곡', '새벽 감성 알앤비', '편안한 재즈 발라드'] },
+};
 
 const EXCLUDE_KEYWORDS = ['cover','커버','live','라이브','lyrics','가사','remix','리믹스','모음','compilation','1시간','mix','매시업','mashup','reaction','리액션','노래방','mr','inst'];
 
-// ---------- 상태 ----------
 let state = {
-  view: 'home',            // home | search | lists | listDetail
-  weather: WEATHER_PRESETS[0],
-  playlists: [],           // [{id, name, tracks:[{id,title,artist}]}]
-  activeListId: null,
-  searchInput: '',
-  searchResults: null,
-  searchLoading: false,
-  showOnlyOriginal: true,
-  recommended: [],         // 홈 추천곡
-  recommendLoading: false,
-  queue: [],
-  currentIndex: -1,
-  isPlaying: false,
-  progress: 0,
-  duration: 0,
-  openDropdownId: null,
+  view: 'home', mood: MOOD_BY_TIME.morning,
+  playlists: [], likes: [], history: {}, artistCount: {},
+  activeListId: null, searchInput: '', searchResults: null, searchLoading: false,
+  showOnlyOriginal: true, recommended: [], recommendLoading: false,
+  forYou: [], forYouLoading: false,
+  queue: [], currentIndex: -1, isPlaying: false, progress: 0, duration: 0,
+  openDropdownId: null, npOpen: false, shuffle: false, repeat: false,
 };
 
-// ---------- 저장 (localStorage) ----------
-const STORAGE_KEY = 'som2music_data_v1';
+const STORAGE_KEY = 'som2music_data_v2';
 function saveData() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ playlists: state.playlists }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      playlists: state.playlists, likes: state.likes, history: state.history, artistCount: state.artistCount,
+    }));
   } catch (e) {}
 }
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const data = JSON.parse(raw);
-      if (Array.isArray(data.playlists)) state.playlists = data.playlists;
+      const d = JSON.parse(raw);
+      if (Array.isArray(d.playlists)) state.playlists = d.playlists;
+      if (Array.isArray(d.likes)) state.likes = d.likes;
+      if (d.history) state.history = d.history;
+      if (d.artistCount) state.artistCount = d.artistCount;
     }
   } catch (e) {}
-  if (state.playlists.length === 0) {
-    state.playlists = [
-      { id: 'pl_default1', name: '즐겨듣는 곡', tracks: [] },
-    ];
-  }
+  if (state.playlists.length === 0) state.playlists = [{ id: 'pl_default1', name: '즐겨듣는 곡', tracks: [] }];
 }
 
-// ---------- YouTube 검색 ----------
-function classifyTrack(track) {
-  const title = (track.title || '').toLowerCase();
-  const excluded = EXCLUDE_KEYWORDS.some(kw => title.includes(kw.toLowerCase()));
-  return { ...track, likelyOriginal: !excluded };
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
 }
-
-function decodeHtml(str) {
-  const txt = document.createElement('textarea');
-  txt.innerHTML = str;
-  return txt.value;
+function classifyTrack(t) {
+  const title = (t.title || '').toLowerCase();
+  return { ...t, likelyOriginal: !EXCLUDE_KEYWORDS.some(kw => title.includes(kw.toLowerCase())) };
 }
+function decodeHtml(str) { const x = document.createElement('textarea'); x.innerHTML = str; return x.value; }
+function thumbUrl(id) { return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`; }
+function fmtTime(s) { if (!s || isNaN(s)) return '0:00'; const m = Math.floor(s/60); const sec = Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${sec}`; }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-async function searchYouTube(query) {
-  if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.includes('붙여넣')) {
-    throw new Error('NO_KEY');
-  }
-  const q = encodeURIComponent(query);
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=20&q=${q}&key=${YOUTUBE_API_KEY}`;
+async function searchYouTube(query, maxResults) {
+  if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.includes('붙여넣')) throw new Error('NO_KEY');
+  const q = encodeURIComponent(query); const mr = maxResults || 20;
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=${mr}&q=${q}&key=${YOUTUBE_API_KEY}`;
   const res = await fetch(url);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || 'API_ERROR');
-  }
+  if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err?.error?.message || 'API_ERROR'); }
   const data = await res.json();
-  return (data.items || []).map(item => classifyTrack({
-    id: item.id.videoId,
-    title: decodeHtml(item.snippet.title),
-    artist: decodeHtml(item.snippet.channelTitle),
+  return (data.items||[]).map(item => classifyTrack({
+    id: item.id.videoId, title: decodeHtml(item.snippet.title), artist: decodeHtml(item.snippet.channelTitle),
   }));
 }
 
-// ---------- YouTube 플레이어 ----------
-let ytPlayer = null;
-let ytReady = false;
-(function loadYT() {
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.body.appendChild(tag);
-})();
+async function loadRecommended() {
+  if (state.recommendLoading) return;
+  state.recommendLoading = true; render();
+  try {
+    const queries = state.mood.queries;
+    const q = queries[Math.floor(Math.random()*queries.length)];
+    let list = await searchYouTube(q, 20);
+    list = list.filter(t => t.likelyOriginal);
+    state.recommended = shuffle(list).slice(0, 6);
+  } catch (e) { state.recommended = []; }
+  state.recommendLoading = false; render();
+}
+
+async function loadForYou() {
+  const topArtists = Object.entries(state.artistCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);
+  const seedArtists = topArtists.length ? topArtists : shuffle(state.likes).slice(0,3).map(t=>t.artist);
+  if (seedArtists.length === 0) { state.forYou = []; render(); return; }
+  state.forYouLoading = true; render();
+  try {
+    const pick = seedArtists[Math.floor(Math.random()*seedArtists.length)];
+    let list = await searchYouTube(pick + ' 노래', 15);
+    list = list.filter(t => t.likelyOriginal);
+    state.forYou = shuffle(list).slice(0, 5);
+  } catch (e) { state.forYou = []; }
+  state.forYouLoading = false; render();
+}
+
+let ytPlayer = null, ytReady = false;
+(function loadYT(){ const tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api'; document.body.appendChild(tag); })();
 window.onYouTubeIframeAPIReady = function () {
   ytPlayer = new YT.Player('player-host', {
-    height: '1', width: '1',
-    playerVars: { autoplay: 0, controls: 0 },
+    height: '1', width: '1', playerVars: { autoplay: 0, controls: 0 },
     events: {
       onReady: () => { ytReady = true; },
       onStateChange: (e) => {
-        if (e.data === YT.PlayerState.ENDED) playNext();
+        if (e.data === YT.PlayerState.ENDED) {
+          if (state.repeat) playTrackAt(state.queue, state.currentIndex);
+          else playNext();
+        }
         state.isPlaying = (e.data === YT.PlayerState.PLAYING);
         renderPlayerBar();
+        if (state.npOpen) renderNowPlaying();
       },
     },
   });
@@ -248,190 +297,138 @@ window.onYouTubeIframeAPIReady = function () {
 
 setInterval(() => {
   if (ytPlayer && ytPlayer.getCurrentTime) {
-    try {
-      state.progress = ytPlayer.getCurrentTime() || 0;
-      state.duration = ytPlayer.getDuration() || 0;
-      updateProgressBar();
-    } catch (e) {}
+    try { state.progress = ytPlayer.getCurrentTime()||0; state.duration = ytPlayer.getDuration()||0; updateProgressBar(); } catch (e) {}
   }
 }, 500);
 
+function recordPlay(track) {
+  if (!track) return;
+  state.history[track.id] = (state.history[track.id]||0)+1;
+  if (track.artist) state.artistCount[track.artist] = (state.artistCount[track.artist]||0)+1;
+  saveData();
+}
 function playTrackAt(list, index) {
-  state.queue = list;
-  state.currentIndex = index;
+  state.queue = list; state.currentIndex = index;
   const track = list[index];
-  if (track && ytPlayer && ytPlayer.loadVideoById) {
-    ytPlayer.loadVideoById(track.id);
-    ytPlayer.playVideo();
-  }
-  renderPlayerBar();
-  render();
+  if (track && ytPlayer && ytPlayer.loadVideoById) { ytPlayer.loadVideoById(track.id); ytPlayer.playVideo(); recordPlay(track); }
+  renderPlayerBar(); render();
+  if (state.npOpen) renderNowPlaying();
 }
 function playNext() {
-  if (state.currentIndex < 0 || state.queue.length === 0) return;
-  playTrackAt(state.queue, (state.currentIndex + 1) % state.queue.length);
+  if (state.currentIndex<0||state.queue.length===0) return;
+  if (state.shuffle && state.queue.length > 1) {
+    let n; do { n = Math.floor(Math.random()*state.queue.length); } while (n === state.currentIndex);
+    playTrackAt(state.queue, n);
+  } else playTrackAt(state.queue, (state.currentIndex+1)%state.queue.length);
 }
-function playPrev() {
-  if (state.currentIndex < 0 || state.queue.length === 0) return;
-  playTrackAt(state.queue, (state.currentIndex - 1 + state.queue.length) % state.queue.length);
-}
-function togglePlay() {
-  if (!ytPlayer) return;
-  state.isPlaying ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+function playPrev() { if (state.currentIndex<0||state.queue.length===0) return; playTrackAt(state.queue, (state.currentIndex-1+state.queue.length)%state.queue.length); }
+function togglePlay() { if (!ytPlayer) return; state.isPlaying ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+function seekTo(ratio) { if (ytPlayer && state.duration) ytPlayer.seekTo(state.duration*ratio, true); }
+function toggleShuffle() { state.shuffle = !state.shuffle; if (state.npOpen) renderNowPlaying(); }
+function toggleRepeat() { state.repeat = !state.repeat; if (state.npOpen) renderNowPlaying(); }
+
+function isLiked(id) { return state.likes.some(t => t.id === id); }
+function toggleLike(track) {
+  if (!track) return;
+  if (isLiked(track.id)) state.likes = state.likes.filter(t => t.id !== track.id);
+  else state.likes.push({ id: track.id, title: track.title, artist: track.artist });
+  saveData();
+  if (state.npOpen) renderNowPlaying();
+  render();
 }
 
-// ---------- 리스트 조작 ----------
 function addToList(listId, track) {
-  const list = state.playlists.find(l => l.id === listId);
-  if (!list) return;
-  if (!list.tracks.some(t => t.id === track.id)) {
-    list.tracks.push({ id: track.id, title: track.title, artist: track.artist });
-    saveData();
-  }
-  showToast(`"${list.name}"에 추가했어요`);
-  state.openDropdownId = null;
-  render();
+  const list = state.playlists.find(l => l.id === listId); if (!list) return;
+  if (!list.tracks.some(t => t.id === track.id)) { list.tracks.push({ id: track.id, title: track.title, artist: track.artist }); saveData(); }
+  showToast(`"${list.name}"에 추가했어요`); state.openDropdownId = null; render();
 }
 function removeFromList(listId, trackId) {
-  const list = state.playlists.find(l => l.id === listId);
-  if (!list) return;
-  list.tracks = list.tracks.filter(t => t.id !== trackId);
-  saveData();
-  render();
+  const list = state.playlists.find(l => l.id === listId); if (!list) return;
+  list.tracks = list.tracks.filter(t => t.id !== trackId); saveData(); render();
 }
 function createList(name) {
   if (!name.trim()) return;
-  state.playlists.push({ id: 'pl_' + Date.now(), name: name.trim(), tracks: [] });
-  saveData();
-  showToast(`"${name.trim()}" 리스트를 만들었어요`);
-  render();
+  state.playlists.push({ id: 'pl_'+Date.now(), name: name.trim(), tracks: [] }); saveData();
+  showToast(`"${name.trim()}" 리스트를 만들었어요`); render();
 }
-function deleteList(listId) {
-  state.playlists = state.playlists.filter(l => l.id !== listId);
-  saveData();
-  state.view = 'lists';
-  render();
-}
+function deleteList(listId) { state.playlists = state.playlists.filter(l => l.id !== listId); saveData(); state.view = 'lists'; render(); }
 
-// ---------- 추천곡 (홈) ----------
-async function loadRecommended() {
-  if (state.recommendLoading) return;
-  state.recommendLoading = true;
-  render();
-  try {
-    state.recommended = await searchYouTube(state.weather.q);
-    state.recommended = state.recommended.filter(t => t.likelyOriginal).slice(0, 6);
-  } catch (e) {
-    state.recommended = [];
-  }
-  state.recommendLoading = false;
-  render();
-}
-
-// ---------- UI 유틸 ----------
 function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 1800);
-}
-function fmtTime(s) {
-  if (!s || isNaN(s)) return '0:00';
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60).toString().padStart(2, '0');
-  return `${m}:${sec}`;
-}
-function esc(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 1800);
 }
 
-// ---------- 렌더링 ----------
 function render() {
   const cur = state.currentIndex >= 0 ? state.queue[state.currentIndex] : null;
-  document.getElementById('header').style.background =
-    `linear-gradient(180deg, ${state.weather.tint}33 0%, transparent 100%)`;
+  document.getElementById('header').style.background = `linear-gradient(180deg, ${state.mood.tint}33 0%, transparent 100%)`;
 
-  // 헤더
   const hc = document.getElementById('header-content');
+  const ha = document.getElementById('header-action'); ha.innerHTML = '';
   if (state.view === 'home') {
-    hc.innerHTML = `<h1 class="title">${state.weather.emoji} ${state.weather.label}</h1><p class="subtitle">${state.weather.text}</p>`;
-  } else if (state.view === 'search') {
-    hc.innerHTML = `<h1 class="title-sm">검색</h1>`;
-  } else if (state.view === 'lists') {
-    hc.innerHTML = `<h1 class="title-sm">내 리스트</h1>`;
-  } else if (state.view === 'listDetail') {
-    const l = state.playlists.find(x => x.id === state.activeListId);
-    hc.innerHTML = `<h1 class="title-sm">${esc(l ? l.name : '')}</h1>`;
-  }
+    hc.innerHTML = `<h1 class="title">${state.mood.emoji} ${state.mood.label}</h1><p class="subtitle">오늘은 어떤 음악이 어울릴까요</p>`;
+    ha.innerHTML = `<button class="refresh-btn" onclick="refreshRecommend()" aria-label="새로고침">↻</button>`;
+  } else if (state.view === 'search') hc.innerHTML = `<h1 class="title-sm">검색</h1>`;
+  else if (state.view === 'lists') hc.innerHTML = `<h1 class="title-sm">내 리스트</h1>`;
+  else if (state.view === 'listDetail') { const l = state.playlists.find(x=>x.id===state.activeListId); hc.innerHTML = `<h1 class="title-sm">${esc(l?l.name:'')}</h1>`; }
+  else if (state.view === 'likes') hc.innerHTML = `<h1 class="title-sm">좋아요한 곡</h1>`;
 
-  // 본문
-  const main = document.getElementById('main');
-  let html = '';
+  const main = document.getElementById('main'); let html = '';
 
   if (state.view === 'home') {
-    html += `<section class="section"><div class="section-label">${state.weather.label}에 어울리는 곡</div><div class="track-list">`;
-    if (state.recommendLoading) {
-      html += `<div class="loading">추천곡을 불러오는 중…</div>`;
-    } else if (state.recommended.length === 0) {
-      html += `<div class="empty">추천곡을 불러오지 못했어요.<br><span style="font-size:11px">API 키를 입력했는지 확인해주세요.</span></div>`;
-    } else {
-      state.recommended.forEach((t, i) => {
-        html += trackRowHtml(t, cur && cur.id === t.id, `playTrackAt(state.recommended, ${i})`);
-      });
-    }
+    html += `<section class="section"><div class="section-head"><div class="section-label">오늘의 추천</div></div><div class="track-list">`;
+    if (state.recommendLoading) html += `<div class="loading">추천곡을 불러오는 중…</div>`;
+    else if (state.recommended.length === 0) html += `<div class="empty">추천곡을 불러오지 못했어요.<br><span style="font-size:11px">API 키를 확인해주세요.</span></div>`;
+    else state.recommended.forEach((t,i)=>{ html += trackRowHtml(t, cur&&cur.id===t.id, `playTrackAt(state.recommended, ${i})`); });
     html += `</div></section>`;
+
+    const hasTaste = Object.keys(state.artistCount).length > 0 || state.likes.length > 0;
+    if (hasTaste) {
+      html += `<section class="section"><div class="section-head"><div class="section-label">자주 듣는 취향 추천</div></div><div class="track-list">`;
+      if (state.forYouLoading) html += `<div class="loading">취향 분석 중…</div>`;
+      else if (state.forYou.length === 0) html += `<div class="empty">조금 더 들으면 취향에 맞는 곡을 추천해드려요.</div>`;
+      else state.forYou.forEach((t,i)=>{ html += trackRowHtml(t, cur&&cur.id===t.id, `playTrackAt(state.forYou, ${i})`); });
+      html += `</div></section>`;
+    }
   }
 
   if (state.view === 'search') {
-    html += `
-      <input class="search-input" id="search-input" placeholder="성시경, 노동요, 락, 발라드..." value="${esc(state.searchInput)}">
-      <div class="filter-row">
-        <button class="filter-chip ${state.showOnlyOriginal ? 'on' : ''}" onclick="toggleOriginal()">
-          ${state.showOnlyOriginal ? '✓ 원곡만 보기' : '원곡만 보기'}
-        </button>
-      </div>`;
-    if (state.searchLoading) {
-      html += `<div class="loading">검색 중…</div>`;
-    } else if (state.searchResults) {
-      const vis = state.showOnlyOriginal ? state.searchResults.filter(t => t.likelyOriginal) : state.searchResults;
-      if (vis.length === 0) {
-        html += `<div class="empty">결과가 없어요.</div>`;
-      } else {
-        html += `<div class="track-list">`;
-        vis.forEach((t, i) => { html += searchRowHtml(t, cur && cur.id === t.id, i); });
-        html += `</div>`;
-      }
+    html += `<input class="search-input" id="search-input" placeholder="성시경, 노동요, 락, 발라드..." value="${esc(state.searchInput)}">
+      <div class="filter-row"><button class="filter-chip ${state.showOnlyOriginal?'on':''}" onclick="toggleOriginal()">${state.showOnlyOriginal?'✓ 원곡만 보기':'원곡만 보기'}</button></div>`;
+    if (state.searchLoading) html += `<div class="loading">검색 중…</div>`;
+    else if (state.searchResults) {
+      const vis = state.showOnlyOriginal ? state.searchResults.filter(t=>t.likelyOriginal) : state.searchResults;
+      if (vis.length === 0) html += `<div class="empty">결과가 없어요.</div>`;
+      else { html += `<div class="track-list">`; vis.forEach((t,i)=>{ html += searchRowHtml(t, cur&&cur.id===t.id, i); }); html += `</div>`; }
     }
   }
 
   if (state.view === 'lists') {
     html += `<div class="track-list">`;
     state.playlists.forEach(l => {
-      html += `<button class="list-row" onclick="openList('${l.id}')">
-        <div class="track-info"><div class="track-title">${esc(l.name)}</div><div class="track-artist">${l.tracks.length}곡</div></div>
-        <span style="color:#A6A398">›</span></button>`;
+      html += `<button class="list-row" onclick="openList('${l.id}')"><div class="track-info"><div class="track-title">${esc(l.name)}</div><div class="track-artist">${l.tracks.length}곡</div></div><span style="color:#A6A398">›</span></button>`;
     });
-    if (state.playlists.length === 0) html += `<div class="empty">아직 만든 리스트가 없어요.</div>`;
-    html += `</div>
-      <div id="newlist-area">
-        <button class="add-list-btn" onclick="showNewListInput()">+ 새 리스트 만들기</button>
-      </div>`;
+    html += `<button class="list-row" onclick="openLikes()"><div class="track-info"><div class="track-title">♥ 좋아요한 곡</div><div class="track-artist">${state.likes.length}곡</div></div><span style="color:#A6A398">›</span></button>`;
+    html += `</div><div id="newlist-area"><button class="add-list-btn" onclick="showNewListInput()">+ 새 리스트 만들기</button></div>`;
+  }
+
+  if (state.view === 'likes') {
+    html += `<button class="back-btn" onclick="go('lists')">‹ 내 리스트</button><div class="track-list">`;
+    state.likes.forEach((t,i)=>{
+      const active = cur&&cur.id===t.id?'active':'';
+      html += `<div class="row-with-delete"><button class="row-inner ${active}" onclick="playFromLikes(${i})"><div class="track-info"><div class="track-title">${esc(t.title)}</div><div class="track-artist">${esc(t.artist)}</div></div></button><button class="del-btn" onclick="toggleLike(${escAttr(t)})">제외</button></div>`;
+    });
+    if (state.likes.length === 0) html += `<div class="empty">재생 화면에서 ♥를 누르면 여기에 모여요.</div>`;
+    html += `</div>`;
   }
 
   if (state.view === 'listDetail') {
-    const l = state.playlists.find(x => x.id === state.activeListId);
+    const l = state.playlists.find(x=>x.id===state.activeListId);
     html += `<button class="back-btn" onclick="go('lists')">‹ 내 리스트</button>`;
     if (l) {
       html += `<div class="track-list">`;
-      l.tracks.forEach((t, i) => {
-        const active = cur && cur.id === t.id ? 'active' : '';
-        html += `<div class="row-with-delete">
-          <button class="row-inner ${active}" onclick="playFromList('${l.id}', ${i})">
-            <div class="track-info"><div class="track-title">${esc(t.title)}</div><div class="track-artist">${esc(t.artist)}</div></div>
-          </button>
-          <button class="del-btn" onclick="removeFromList('${l.id}','${t.id}')">제외</button>
-        </div>`;
+      l.tracks.forEach((t,i)=>{
+        const active = cur&&cur.id===t.id?'active':'';
+        html += `<div class="row-with-delete"><button class="row-inner ${active}" onclick="playFromList('${l.id}', ${i})"><div class="track-info"><div class="track-title">${esc(t.title)}</div><div class="track-artist">${esc(t.artist)}</div></div></button><button class="del-btn" onclick="removeFromList('${l.id}','${t.id}')">제외</button></div>`;
       });
       if (l.tracks.length === 0) html += `<div class="empty">곡을 검색해서 추가해보세요.</div>`;
       html += `</div><button class="del-list-btn" onclick="deleteList('${l.id}')">리스트 삭제</button>`;
@@ -440,71 +437,35 @@ function render() {
 
   main.innerHTML = html;
 
-  // 검색 입력 이벤트 재바인딩
   const si = document.getElementById('search-input');
   if (si) {
-    si.oninput = (e) => { state.searchInput = e.target.value; };
+    si.oninput = (e) => { state.searchInput = e.target.value; clearTimeout(si._t); si._t = setTimeout(()=>doSearch(), 600); };
     si.onkeydown = (e) => { if (e.key === 'Enter') doSearch(); };
-    si.onblur = () => {}; // 유지
-    // 엔터 외에도 입력 멈추면 자동 검색
-    clearTimeout(si._t);
-    si.oninput = (e) => {
-      state.searchInput = e.target.value;
-      clearTimeout(si._t);
-      si._t = setTimeout(() => doSearch(), 600);
-    };
   }
-
-  renderNav();
-  renderPlayerBar();
+  renderNav(); renderPlayerBar();
 }
 
 function trackRowHtml(t, active, onclick) {
-  return `<button class="track-row ${active ? 'active' : ''}" onclick="${onclick}">
-    <div class="track-info"><div class="track-title">${esc(t.title)}</div><div class="track-artist">${esc(t.artist)}</div></div>
-    ${active ? '<span class="playing-dot">●</span>' : ''}
-  </button>`;
+  return `<button class="track-row ${active?'active':''}" onclick="${onclick}"><div class="track-left"><div class="track-ic">♪</div><div class="track-info"><div class="track-title">${esc(t.title)}</div><div class="track-artist">${esc(t.artist)}</div></div></div>${active?'<span class="playing-dot">●</span>':''}</button>`;
 }
-
 function searchRowHtml(t, active, i) {
-  const open = state.openDropdownId === t.id;
-  let dd = '';
+  const open = state.openDropdownId === t.id; let dd = '';
   if (open) {
     dd = `<div class="add-dropdown">`;
     if (state.playlists.length === 0) dd += `<div class="dd-empty">리스트를 먼저 만들어주세요</div>`;
-    state.playlists.forEach(l => {
-      dd += `<button onclick="addToList('${l.id}', ${escAttr(t)})">${esc(l.name)}</button>`;
-    });
+    state.playlists.forEach(l => { dd += `<button onclick="addToList('${l.id}', ${escAttr(t)})">${esc(l.name)}</button>`; });
     dd += `</div>`;
   }
-  return `<div class="search-row">
-    <button class="search-row-main ${active ? 'active' : ''}" onclick="playFromSearch(${i})">
-      <div class="track-info">
-        <div class="track-title">${esc(t.title)}${!t.likelyOriginal ? '<span class="tag-warn"> · 원곡 아닐 수 있음</span>' : ''}</div>
-        <div class="track-artist">${esc(t.artist)}</div>
-      </div>
-    </button>
-    <div class="add-wrap">
-      <button class="add-btn" onclick="toggleDropdown('${t.id}')">+</button>
-      ${dd}
-    </div>
-  </div>`;
+  return `<div class="search-row"><button class="search-row-main ${active?'active':''}" onclick="playFromSearch(${i})"><div class="track-info"><div class="track-title">${esc(t.title)}${!t.likelyOriginal?'<span class="tag-warn"> · 원곡 아닐 수 있음</span>':''}</div><div class="track-artist">${esc(t.artist)}</div></div></button><div class="add-wrap"><button class="add-btn" onclick="toggleDropdown('${t.id}')">+</button>${dd}</div></div>`;
 }
-
-function escAttr(t) {
-  return JSON.stringify({ id: t.id, title: t.title, artist: t.artist }).replace(/"/g, '&quot;');
-}
+function escAttr(t) { return JSON.stringify({ id: t.id, title: t.title, artist: t.artist }).replace(/"/g,'&quot;'); }
 
 function renderNav() {
   const nav = document.getElementById('bottom-nav');
-  const tabs = [
-    { key: 'home', label: '홈' },
-    { key: 'search', label: '검색' },
-    { key: 'lists', label: '내 리스트' },
-  ];
+  const tabs = [{key:'home',label:'홈'},{key:'search',label:'검색'},{key:'lists',label:'내 리스트'}];
   nav.innerHTML = tabs.map(t => {
-    const on = state.view === t.key || (t.key === 'lists' && state.view === 'listDetail');
-    return `<button class="${on ? 'on' : ''}" onclick="go('${t.key}')">${t.label}</button>`;
+    const on = state.view===t.key || (t.key==='lists' && (state.view==='listDetail'||state.view==='likes'));
+    return `<button class="${on?'on':''}" onclick="go('${t.key}')">${t.label}</button>`;
   }).join('');
 }
 
@@ -512,111 +473,92 @@ function renderPlayerBar() {
   const bar = document.getElementById('player-bar');
   const cur = state.currentIndex >= 0 ? state.queue[state.currentIndex] : null;
   if (!cur) { bar.innerHTML = ''; return; }
-  const pct = state.duration ? (state.progress / state.duration) * 100 : 0;
-  bar.innerHTML = `<div class="player-bar">
-    <div class="progress-track"><div class="progress-fill" id="pfill" style="width:${pct}%"></div></div>
-    <div class="player-row">
-      <div class="now-playing">
-        <div class="now-title">${esc(cur.title)}</div>
-        <div class="now-artist">${esc(cur.artist)} · ${fmtTime(state.progress)} / ${fmtTime(state.duration)}</div>
-      </div>
-      <div class="controls">
-        <button class="ctrl" onclick="playPrev()">⏮</button>
-        <button class="ctrl-main" onclick="togglePlay()">${state.isPlaying ? '⏸' : '▶'}</button>
-        <button class="ctrl" onclick="playNext()">⏭</button>
-      </div>
-    </div>
-  </div>`;
+  const pct = state.duration ? (state.progress/state.duration)*100 : 0;
+  bar.innerHTML = `<div class="player-bar" onclick="openNowPlaying()"><div class="progress-track"><div class="progress-fill" id="pfill" style="width:${pct}%"></div></div><div class="player-row"><div class="now-playing"><div class="now-title">${esc(cur.title)}</div><div class="now-artist">${esc(cur.artist)}</div></div><div class="controls" onclick="event.stopPropagation()"><button class="ctrl" onclick="playPrev()">⏮</button><button class="ctrl-main" onclick="togglePlay()">${state.isPlaying?'⏸':'▶'}</button><button class="ctrl" onclick="playNext()">⏭</button></div></div></div>`;
 }
 function updateProgressBar() {
-  const fill = document.getElementById('pfill');
-  if (fill && state.duration) fill.style.width = ((state.progress / state.duration) * 100) + '%';
-  // 시간 텍스트도 갱신
-  const cur = state.currentIndex >= 0 ? state.queue[state.currentIndex] : null;
-  if (cur) {
-    const na = document.querySelector('.now-artist');
-    if (na) na.textContent = `${cur.artist} · ${fmtTime(state.progress)} / ${fmtTime(state.duration)}`;
+  const pct = state.duration ? (state.progress/state.duration)*100 : 0;
+  const fill = document.getElementById('pfill'); if (fill) fill.style.width = pct+'%';
+  if (state.npOpen) {
+    const nf = document.getElementById('np-fill'); if (nf) nf.style.width = pct+'%';
+    const nk = document.getElementById('np-knob'); if (nk) nk.style.left = pct+'%';
+    const ct = document.getElementById('np-cur'); if (ct) ct.textContent = fmtTime(state.progress);
+    const dt = document.getElementById('np-dur'); if (dt) dt.textContent = fmtTime(state.duration);
   }
 }
 
-// ---------- 액션 핸들러 (전역) ----------
+function openNowPlaying() {
+  if (state.currentIndex < 0) return;
+  state.npOpen = true; renderNowPlaying();
+  document.getElementById('np-screen').classList.add('open');
+}
+function closeNowPlaying() { state.npOpen = false; document.getElementById('np-screen').classList.remove('open'); }
+function renderNowPlaying() {
+  const el = document.getElementById('np-screen');
+  const cur = state.currentIndex >= 0 ? state.queue[state.currentIndex] : null;
+  if (!cur) { el.innerHTML = ''; return; }
+  const pct = state.duration ? (state.progress/state.duration)*100 : 0;
+  const liked = isLiked(cur.id);
+  const bars = Array.from({length:28}, (_,i)=>`<span style="height:${8+(i%5)*5}px; animation-delay:${(i%7)*0.1}s"></span>`).join('');
+  el.innerHTML = `
+    <div class="np-top"><button class="np-close" onclick="closeNowPlaying()">⌄</button><div class="np-top-label">지금 재생 중</div><div style="width:26px"></div></div>
+    <div class="np-body">
+      <div class="np-art"><img src="${thumbUrl(cur.id)}" onerror="this.style.display='none';this.parentNode.innerHTML='<div class=\\'np-art-fallback\\'>♪</div>'"></div>
+      <div class="np-meta"><div style="min-width:0"><div class="np-song">${esc(cur.title)}</div><div class="np-singer">${esc(cur.artist)}</div></div><button class="np-like" onclick="toggleLike(${escAttr(cur)})">${liked?'❤️':'🤍'}</button></div>
+      <div class="np-progress"><div class="np-bar" onclick="npSeek(event)"><div class="np-bar-fill" id="np-fill" style="width:${pct}%"></div><div class="np-bar-knob" id="np-knob" style="left:${pct}%"></div></div><div class="np-time"><span id="np-cur">${fmtTime(state.progress)}</span><span id="np-dur">${fmtTime(state.duration)}</span></div></div>
+      <div class="np-controls"><button class="np-cbtn side ${state.shuffle?'on':''}" onclick="toggleShuffle()">⤨</button><button class="np-cbtn skip" onclick="playPrev()">⏮</button><button class="np-cbtn np-play" onclick="togglePlay()">${state.isPlaying?'⏸':'▶'}</button><button class="np-cbtn skip" onclick="playNext()">⏭</button><button class="np-cbtn side ${state.repeat?'on':''}" onclick="toggleRepeat()">⟲</button></div>
+      <div class="np-wave ${state.isPlaying?'playing':''}">${bars}</div>
+    </div>`;
+}
+function npSeek(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX-rect.left)/rect.width));
+  seekTo(ratio);
+}
+
 function go(view) {
-  state.view = view;
-  state.openDropdownId = null;
-  if (view === 'home' && state.recommended.length === 0 && !state.recommendLoading) {
-    loadRecommended();
-  } else {
-    render();
+  state.view = view; state.openDropdownId = null;
+  if (view === 'home') {
+    if (state.recommended.length === 0 && !state.recommendLoading) loadRecommended();
+    if (state.forYou.length === 0 && !state.forYouLoading) loadForYou();
   }
+  render();
 }
+function refreshRecommend() { loadRecommended(); loadForYou(); }
 function openList(id) { state.activeListId = id; state.view = 'listDetail'; render(); }
-function playFromSearch(i) {
-  const vis = state.showOnlyOriginal ? state.searchResults.filter(t => t.likelyOriginal) : state.searchResults;
-  playTrackAt(vis, i);
-}
-function playFromList(listId, i) {
-  const l = state.playlists.find(x => x.id === listId);
-  if (l) playTrackAt(l.tracks, i);
-}
+function openLikes() { state.view = 'likes'; render(); }
+function playFromSearch(i) { const vis = state.showOnlyOriginal ? state.searchResults.filter(t=>t.likelyOriginal) : state.searchResults; playTrackAt(vis, i); }
+function playFromList(listId, i) { const l = state.playlists.find(x=>x.id===listId); if (l) playTrackAt(l.tracks, i); }
+function playFromLikes(i) { playTrackAt(state.likes, i); }
 function toggleOriginal() { state.showOnlyOriginal = !state.showOnlyOriginal; render(); }
 function toggleDropdown(id) { state.openDropdownId = state.openDropdownId === id ? null : id; render(); }
 async function doSearch() {
   const q = state.searchInput.trim();
   if (!q) { state.searchResults = null; render(); return; }
-  state.searchLoading = true;
-  state.openDropdownId = null;
-  render();
-  try {
-    state.searchResults = await searchYouTube(q);
-  } catch (e) {
-    state.searchResults = [];
-    if (e.message === 'NO_KEY') {
-      showToast('API 키를 먼저 입력해주세요');
-    } else {
-      showToast('검색 오류: ' + e.message.slice(0, 40));
-    }
-  }
-  state.searchLoading = false;
-  render();
+  state.searchLoading = true; state.openDropdownId = null; render();
+  try { state.searchResults = await searchYouTube(q); }
+  catch (e) { state.searchResults = []; if (e.message==='NO_KEY') showToast('API 키를 먼저 입력해주세요'); else showToast('검색 오류: '+e.message.slice(0,40)); }
+  state.searchLoading = false; render();
 }
 function showNewListInput() {
   const area = document.getElementById('newlist-area');
-  area.innerHTML = `<div class="new-list-row">
-    <input id="newlist-input" placeholder="리스트 이름 (예: 노동요)" autofocus>
-    <button onclick="confirmNewList()">추가</button>
-  </div>`;
-  const inp = document.getElementById('newlist-input');
-  inp.focus();
+  area.innerHTML = `<div class="new-list-row"><input id="newlist-input" placeholder="리스트 이름 (예: 노동요)"><button onclick="confirmNewList()">추가</button></div>`;
+  const inp = document.getElementById('newlist-input'); inp.focus();
   inp.onkeydown = (e) => { if (e.key === 'Enter') confirmNewList(); };
 }
-function confirmNewList() {
-  const inp = document.getElementById('newlist-input');
-  if (inp && inp.value.trim()) createList(inp.value);
-}
+function confirmNewList() { const inp = document.getElementById('newlist-input'); if (inp && inp.value.trim()) createList(inp.value); }
 
-// 바깥 클릭 시 드롭다운 닫기
 document.addEventListener('click', (e) => {
-  if (state.openDropdownId && !e.target.closest('.add-wrap')) {
-    state.openDropdownId = null;
-    render();
-  }
+  if (state.openDropdownId && !e.target.closest('.add-wrap')) { state.openDropdownId = null; render(); }
 }, true);
 
-// ---------- 초기화 ----------
 function init() {
   const hour = new Date().getHours();
-  if (hour >= 6 && hour < 17) state.weather = WEATHER_PRESETS[0];
-  else if (hour >= 17 && hour < 20) state.weather = WEATHER_PRESETS[1];
-  else state.weather = WEATHER_PRESETS[2];
-
-  loadData();
-  render();
-  loadRecommended();
-
-  // PWA 서비스워커 등록
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  }
+  if (hour >= 6 && hour < 17) state.mood = MOOD_BY_TIME.morning;
+  else if (hour >= 17 && hour < 20) state.mood = MOOD_BY_TIME.evening;
+  else state.mood = MOOD_BY_TIME.night;
+  loadData(); render(); loadRecommended(); loadForYou();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 init();
 </script>
