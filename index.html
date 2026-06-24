@@ -13,7 +13,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   :root {
     --bg: #FAFAF8; --ink: #2B2B28; --sub: #8A8578; --line: #EAE7DD;
-    --card: #FFFFFF; --accent: #F5821F; --accent-soft: #FFF1E6; --muted: #9C9A8E;
+    --card: #FFFFFF; --accent: #B13A2F; --accent-soft: #F5E9E7; --muted: #9C9A8E;
   }
   html, body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--ink); background: var(--bg); }
   body { min-height: 100vh; padding-bottom: 150px; }
@@ -38,7 +38,7 @@
   .track-row { display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left;
     border: none; background: var(--card); border-radius: 14px; padding: 14px 16px; cursor: pointer;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04); font-family: inherit; gap: 12px; }
-  .track-row.active { background: rgba(245,130,31,0.10); }
+  .track-row.active { background: rgba(177,58,47,0.10); }
   .track-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
   .track-ic { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
     display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
@@ -61,7 +61,7 @@
   .search-row { display: flex; align-items: center; gap: 8px; }
   .search-row-main { flex: 1; display: flex; text-align: left; border: none; background: var(--card);
     border-radius: 14px; padding: 16px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-width: 0; font-family: inherit; }
-  .search-row-main.active { background: rgba(245,130,31,0.10); }
+  .search-row-main.active { background: rgba(177,58,47,0.10); }
   .add-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--card);
     font-size: 20px; color: var(--ink); cursor: pointer; flex-shrink: 0; }
   .add-wrap { position: relative; }
@@ -87,7 +87,7 @@
   .row-with-delete { display: flex; align-items: center; gap: 8px; }
   .row-inner { flex: 1; display: flex; text-align: left; border: none; background: var(--card); border-radius: 14px;
     padding: 18px 16px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-width: 0; font-family: inherit; }
-  .row-inner.active { background: rgba(245,130,31,0.10); }
+  .row-inner.active { background: rgba(177,58,47,0.10); }
   .del-btn { border: none; background: none; color: #B0563D; font-size: 12px; font-weight: 600; cursor: pointer;
     flex-shrink: 0; padding: 10px; font-family: inherit; }
   .del-list-btn { width: 100%; border: none; background: none; color: #B0563D; font-size: 13px; font-weight: 600;
@@ -148,7 +148,7 @@
   .np-cbtn.side { font-size: 22px; color: var(--sub); }
   .np-cbtn.skip { font-size: 28px; }
   .np-play { width: 68px; height: 68px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 24px;
-    box-shadow: 0 8px 20px rgba(245,130,31,0.35); }
+    box-shadow: 0 8px 20px rgba(177,58,47,0.30); }
   .np-cbtn.on { color: var(--accent); }
 
   .np-wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 40px; margin-top: 28px; width: 100%; max-width: 320px; }
@@ -311,7 +311,10 @@ function playTrackAt(list, index) {
   state.queue = list; state.currentIndex = index;
   const track = list[index];
   if (track && ytPlayer && ytPlayer.loadVideoById) { ytPlayer.loadVideoById(track.id); ytPlayer.playVideo(); recordPlay(track); }
-  renderPlayerBar(); render();
+  renderPlayerBar();
+  // 검색 화면에선 입력창 포커스 보존을 위해 결과만 갱신
+  if (state.view === 'search') renderSearchResults();
+  else render();
   if (state.npOpen) renderNowPlaying();
 }
 function playNext() {
@@ -340,7 +343,8 @@ function toggleLike(track) {
 function addToList(listId, track) {
   const list = state.playlists.find(l => l.id === listId); if (!list) return;
   if (!list.tracks.some(t => t.id === track.id)) { list.tracks.push({ id: track.id, title: track.title, artist: track.artist }); saveData(); }
-  showToast(`"${list.name}"에 추가했어요`); state.openDropdownId = null; render();
+  showToast(`"${list.name}"에 추가했어요`); state.openDropdownId = null;
+  if (state.view === 'search') renderSearchResults(); else render();
 }
 function removeFromList(listId, trackId) {
   const list = state.playlists.find(l => l.id === listId); if (!list) return;
@@ -393,13 +397,8 @@ function render() {
 
   if (state.view === 'search') {
     html += `<input class="search-input" id="search-input" placeholder="성시경, 노동요, 락, 발라드..." value="${esc(state.searchInput)}">
-      <div class="filter-row"><button class="filter-chip ${state.showOnlyOriginal?'on':''}" onclick="toggleOriginal()">${state.showOnlyOriginal?'✓ 원곡만 보기':'원곡만 보기'}</button></div>`;
-    if (state.searchLoading) html += `<div class="loading">검색 중…</div>`;
-    else if (state.searchResults) {
-      const vis = state.showOnlyOriginal ? state.searchResults.filter(t=>t.likelyOriginal) : state.searchResults;
-      if (vis.length === 0) html += `<div class="empty">결과가 없어요.</div>`;
-      else { html += `<div class="track-list">`; vis.forEach((t,i)=>{ html += searchRowHtml(t, cur&&cur.id===t.id, i); }); html += `</div>`; }
-    }
+      <div class="filter-row"><button class="filter-chip ${state.showOnlyOriginal?'on':''}" onclick="toggleOriginal()">${state.showOnlyOriginal?'✓ 원곡만 보기':'원곡만 보기'}</button></div>
+      <div id="search-results">${searchResultsHtml(cur)}</div>`;
   }
 
   if (state.view === 'lists') {
@@ -459,6 +458,24 @@ function searchRowHtml(t, active, i) {
   return `<div class="search-row"><button class="search-row-main ${active?'active':''}" onclick="playFromSearch(${i})"><div class="track-info"><div class="track-title">${esc(t.title)}${!t.likelyOriginal?'<span class="tag-warn"> · 원곡 아닐 수 있음</span>':''}</div><div class="track-artist">${esc(t.artist)}</div></div></button><div class="add-wrap"><button class="add-btn" onclick="toggleDropdown('${t.id}')">+</button>${dd}</div></div>`;
 }
 function escAttr(t) { return JSON.stringify({ id: t.id, title: t.title, artist: t.artist }).replace(/"/g,'&quot;'); }
+
+// 검색 결과 영역만 HTML 생성 (입력창은 건드리지 않음)
+function searchResultsHtml(cur) {
+  cur = cur || (state.currentIndex >= 0 ? state.queue[state.currentIndex] : null);
+  if (state.searchLoading) return `<div class="loading">검색 중…</div>`;
+  if (!state.searchResults) return '';
+  const vis = state.showOnlyOriginal ? state.searchResults.filter(t=>t.likelyOriginal) : state.searchResults;
+  if (vis.length === 0) return `<div class="empty">결과가 없어요.</div>`;
+  let h = `<div class="track-list">`;
+  vis.forEach((t,i)=>{ h += searchRowHtml(t, cur&&cur.id===t.id, i); });
+  h += `</div>`;
+  return h;
+}
+// 검색 결과 영역만 다시 그리기 (전체 render 대신 — 입력 포커스 유지)
+function renderSearchResults() {
+  const box = document.getElementById('search-results');
+  if (box) box.innerHTML = searchResultsHtml();
+}
 
 function renderNav() {
   const nav = document.getElementById('bottom-nav');
@@ -530,15 +547,26 @@ function openLikes() { state.view = 'likes'; render(); }
 function playFromSearch(i) { const vis = state.showOnlyOriginal ? state.searchResults.filter(t=>t.likelyOriginal) : state.searchResults; playTrackAt(vis, i); }
 function playFromList(listId, i) { const l = state.playlists.find(x=>x.id===listId); if (l) playTrackAt(l.tracks, i); }
 function playFromLikes(i) { playTrackAt(state.likes, i); }
-function toggleOriginal() { state.showOnlyOriginal = !state.showOnlyOriginal; render(); }
-function toggleDropdown(id) { state.openDropdownId = state.openDropdownId === id ? null : id; render(); }
+function toggleOriginal() {
+  state.showOnlyOriginal = !state.showOnlyOriginal;
+  if (state.view === 'search') {
+    // 칩 색만 바꾸고 결과만 갱신 (입력 포커스 유지)
+    const chip = document.querySelector('.filter-chip');
+    if (chip) { chip.classList.toggle('on', state.showOnlyOriginal); chip.textContent = state.showOnlyOriginal ? '✓ 원곡만 보기' : '원곡만 보기'; }
+    renderSearchResults();
+  } else render();
+}
+function toggleDropdown(id) {
+  state.openDropdownId = state.openDropdownId === id ? null : id;
+  if (state.view === 'search') renderSearchResults(); else render();
+}
 async function doSearch() {
   const q = state.searchInput.trim();
-  if (!q) { state.searchResults = null; render(); return; }
-  state.searchLoading = true; state.openDropdownId = null; render();
+  if (!q) { state.searchResults = null; renderSearchResults(); return; }
+  state.searchLoading = true; state.openDropdownId = null; renderSearchResults();
   try { state.searchResults = await searchYouTube(q); }
   catch (e) { state.searchResults = []; if (e.message==='NO_KEY') showToast('API 키를 먼저 입력해주세요'); else showToast('검색 오류: '+e.message.slice(0,40)); }
-  state.searchLoading = false; render();
+  state.searchLoading = false; renderSearchResults();
 }
 function showNewListInput() {
   const area = document.getElementById('newlist-area');
@@ -549,7 +577,10 @@ function showNewListInput() {
 function confirmNewList() { const inp = document.getElementById('newlist-input'); if (inp && inp.value.trim()) createList(inp.value); }
 
 document.addEventListener('click', (e) => {
-  if (state.openDropdownId && !e.target.closest('.add-wrap')) { state.openDropdownId = null; render(); }
+  if (state.openDropdownId && !e.target.closest('.add-wrap')) {
+    state.openDropdownId = null;
+    if (state.view === 'search') renderSearchResults(); else render();
+  }
 }, true);
 
 function init() {
