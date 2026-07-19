@@ -58,6 +58,19 @@
     font-weight: 600; padding: 7px 14px; border-radius: 20px; cursor: pointer; font-family: inherit; }
   .filter-chip.on { border: none; background: var(--ink); color: var(--bg); }
 
+  .genre-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 18px; -webkit-overflow-scrolling: touch; }
+  .genre-row::-webkit-scrollbar { display: none; }
+  .genre-chip { flex-shrink: 0; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px;
+    font-weight: 600; padding: 9px 16px; border-radius: 20px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .genre-chip:active { background: var(--accent-soft); border-color: var(--accent); }
+
+  .today-story { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .today-story-head { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .today-story-event { font-size: 13px; color: var(--ink); line-height: 1.6; margin-bottom: 8px; }
+  .today-story-quote { font-size: 13px; color: #71705f; line-height: 1.6; border-top: 1px solid var(--line); padding-top: 8px; }
+  .today-story-author { color: var(--muted); }
+
   .search-row { display: flex; align-items: center; gap: 8px; }
   .search-row-main { flex: 1; display: flex; text-align: left; border: none; background: var(--card);
     border-radius: 14px; padding: 16px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-width: 0; font-family: inherit; }
@@ -190,12 +203,46 @@ const MOOD_BY_TIME = {
 
 const EXCLUDE_KEYWORDS = ['cover','커버','live','라이브','lyrics','가사','remix','리믹스','모음','compilation','1시간','mix','매시업','mashup','reaction','리액션','노래방','mr','inst'];
 
+const GENRES = [
+  { id: 'classical', label: '클래식', icon: '\uD83C\uDFBB', queries: ['클래식 명곡', '오케스트라 연주곡', '바이올린 소나타'] },
+  { id: 'piano', label: '피아노연주곡', icon: '\uD83C\uDFB9', queries: ['피아노 연주곡', '뉴에이지 피아노', '피아노 인스트루멘탈'] },
+  { id: 'kpop', label: 'K-pop', icon: '\uD83C\uDFA4', queries: ['케이팝 히트곡', '아이돌 신곡 플레이리스트', 'K-pop 인기곡'] },
+  { id: 'jazz', label: '재즈', icon: '\uD83C\uDFB7', queries: ['재즈 스탠다드', '재즈 보컬', '스무스 재즈'] },
+  { id: 'bossa', label: '보사노바', icon: '\uD83C\uDFB8', queries: ['보사노바 연주곡', '브라질 재즈', '보사노바 보컬'] },
+];
+
+// 오늘과 관련된 역사적 사건 + 그 순간의 말. 'MM-DD' 형식으로 날짜를 추가하면 그날 이 이야기가 떠요.
+const TODAY_STORIES = {
+  '07-19': {
+    event: '1969년 오늘, 아폴로 11호가 달 궤도에 진입했어요. 사령선 조종사 마이클 콜린스는 홀로 궤도를 돌며 동료들이 착륙하기를 기다렸죠.',
+    quote: '모두가 지켜보고 있다는 무게를 느꼈고, 그저 최선을 다하고 싶었다',
+    author: '마이클 콜린스',
+  },
+};
+// 오늘 날짜에 등록된 이야기가 없을 때 대신 보여줄 음악 관련 명언들
+const FALLBACK_QUOTES = [
+  { quote: '음악은 인간 본성이 없어서는 안 될 즐거움을 준다', author: '공자' },
+  { quote: '말로 표현할 수 없는 것을, 음악은 표현한다', author: '빅토르 위고' },
+  { quote: '음악은 우주에 영혼을, 마음에 날개를, 상상에 비상을 준다', author: '플라톤' },
+  { quote: '음악이 없다면 삶은 하나의 오류일 것이다', author: '프리드리히 니체' },
+];
+function getTodayStory() {
+  const now = new Date();
+  const key = String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  const dateLabel = `${now.getMonth()+1}월 ${now.getDate()}일`;
+  const s = TODAY_STORIES[key];
+  if (s) return { dateLabel, event: s.event, quote: s.quote, author: s.author };
+  const f = FALLBACK_QUOTES[now.getDate() % FALLBACK_QUOTES.length];
+  return { dateLabel, event: null, quote: f.quote, author: f.author };
+}
+
 let state = {
   view: 'home', mood: MOOD_BY_TIME.morning,
   playlists: [], likes: [], history: {}, artistCount: {},
   activeListId: null, searchInput: '', searchResults: null, searchLoading: false,
   showOnlyOriginal: true, recommended: [], recommendLoading: false,
   forYou: [], forYouLoading: false,
+  selectedGenre: null, genreRecommended: [], genreLoading: false,
   queue: [], currentIndex: -1, isPlaying: false, progress: 0, duration: 0,
   openDropdownId: null, npOpen: false, shuffle: false, repeat: false,
 };
@@ -252,13 +299,35 @@ async function loadRecommended() {
   if (state.recommendLoading) return;
   state.recommendLoading = true; render();
   try {
-    const queries = state.mood.queries;
-    const q = queries[Math.floor(Math.random()*queries.length)];
-    let list = await searchYouTube(q, 20);
-    list = list.filter(t => t.likelyOriginal);
-    state.recommended = shuffle(list).slice(0, 6);
+    const queries = shuffle(state.mood.queries).slice(0, 4);
+    let all = [];
+    for (const q of queries) {
+      try { all = all.concat((await searchYouTube(q, 10)).filter(t => t.likelyOriginal)); } catch (e) {}
+    }
+    const seen = new Set();
+    const uniq = all.filter(t => (seen.has(t.id) ? false : (seen.add(t.id), true)));
+    state.recommended = shuffle(uniq).slice(0, 7);
   } catch (e) { state.recommended = []; }
   state.recommendLoading = false; render();
+}
+
+async function loadGenreRecommended(genreId) {
+  const g = GENRES.find(x => x.id === genreId); if (!g) return;
+  state.genreLoading = true; render();
+  try {
+    let all = [];
+    for (const q of g.queries) {
+      try { all = all.concat((await searchYouTube(q, 10)).filter(t => t.likelyOriginal)); } catch (e) {}
+    }
+    const seen = new Set();
+    const uniq = all.filter(t => (seen.has(t.id) ? false : (seen.add(t.id), true)));
+    state.genreRecommended = shuffle(uniq).slice(0, 7);
+  } catch (e) { state.genreRecommended = []; }
+  state.genreLoading = false; render();
+}
+function selectGenre(id) {
+  state.selectedGenre = id; state.view = 'genre'; state.genreRecommended = [];
+  loadGenreRecommended(id); render();
 }
 
 async function loadForYou() {
@@ -371,6 +440,9 @@ function render() {
   if (state.view === 'home') {
     hc.innerHTML = `<h1 class="title">${state.mood.emoji} ${state.mood.label}</h1><p class="subtitle">오늘은 어떤 음악이 어울릴까요</p>`;
     ha.innerHTML = `<button class="refresh-btn" onclick="refreshRecommend()" aria-label="새로고침">↻</button>`;
+  } else if (state.view === 'genre') {
+    const g = GENRES.find(x=>x.id===state.selectedGenre);
+    hc.innerHTML = `<h1 class="title-sm">${g?g.icon:''} ${g?esc(g.label):''}</h1><p class="subtitle">이 계열의 오늘의 추천</p>`;
   } else if (state.view === 'search') hc.innerHTML = `<h1 class="title-sm">검색</h1>`;
   else if (state.view === 'lists') hc.innerHTML = `<h1 class="title-sm">내 리스트</h1>`;
   else if (state.view === 'listDetail') { const l = state.playlists.find(x=>x.id===state.activeListId); hc.innerHTML = `<h1 class="title-sm">${esc(l?l.name:'')}</h1>`; }
@@ -379,6 +451,13 @@ function render() {
   const main = document.getElementById('main'); let html = '';
 
   if (state.view === 'home') {
+    html += `<div class="genre-row">${GENRES.map(g=>`<button class="genre-chip" onclick="selectGenre('${g.id}')">${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
+
+    const story = getTodayStory();
+    html += `<section class="today-story"><div class="today-story-head">\uD83D\uDCC5 ${story.dateLabel}, 오늘의 이야기</div>`;
+    if (story.event) html += `<p class="today-story-event">${esc(story.event)}</p>`;
+    html += `<div class="today-story-quote">${esc(story.quote)} <span class="today-story-author">— ${esc(story.author)}</span></div></section>`;
+
     html += `<section class="section"><div class="section-head"><div class="section-label">오늘의 추천</div></div><div class="track-list">`;
     if (state.recommendLoading) html += `<div class="loading">추천곡을 불러오는 중…</div>`;
     else if (state.recommended.length === 0) html += `<div class="empty">추천곡을 불러오지 못했어요.<br><span style="font-size:11px">API 키를 확인해주세요.</span></div>`;
@@ -393,6 +472,14 @@ function render() {
       else state.forYou.forEach((t,i)=>{ html += trackRowHtml(t, cur&&cur.id===t.id, `playTrackAt(state.forYou, ${i})`); });
       html += `</div></section>`;
     }
+  }
+
+  if (state.view === 'genre') {
+    html += `<button class="back-btn" onclick="go('home')">‹ 홈</button><div class="track-list">`;
+    if (state.genreLoading) html += `<div class="loading">추천곡을 불러오는 중…</div>`;
+    else if (state.genreRecommended.length === 0) html += `<div class="empty">추천곡을 불러오지 못했어요.<br><span style="font-size:11px">API 키를 확인해주세요.</span></div>`;
+    else state.genreRecommended.forEach((t,i)=>{ html += trackRowHtml(t, cur&&cur.id===t.id, `playTrackAt(state.genreRecommended, ${i})`); });
+    html += `</div>`;
   }
 
   if (state.view === 'search') {
@@ -481,7 +568,7 @@ function renderNav() {
   const nav = document.getElementById('bottom-nav');
   const tabs = [{key:'home',label:'홈'},{key:'search',label:'검색'},{key:'lists',label:'내 리스트'}];
   nav.innerHTML = tabs.map(t => {
-    const on = state.view===t.key || (t.key==='lists' && (state.view==='listDetail'||state.view==='likes'));
+    const on = state.view===t.key || (t.key==='lists' && (state.view==='listDetail'||state.view==='likes')) || (t.key==='home' && state.view==='genre');
     return `<button class="${on?'on':''}" onclick="go('${t.key}')">${t.label}</button>`;
   }).join('');
 }
