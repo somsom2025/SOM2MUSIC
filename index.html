@@ -63,6 +63,19 @@
   .genre-chip { flex-shrink: 0; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px;
     font-weight: 600; padding: 9px 16px; border-radius: 20px; cursor: pointer; font-family: inherit; white-space: nowrap; }
   .genre-chip:active { background: var(--accent-soft); border-color: var(--accent); }
+  .genre-hint { font-size: 11px; color: var(--muted); margin: -10px 0 18px; }
+
+  .genre-edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex;
+    align-items: center; justify-content: center; z-index: 200; padding: 24px; }
+  .genre-edit-card { background: var(--card); border-radius: 16px; padding: 20px; width: 100%; max-width: 320px; }
+  .genre-edit-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 14px; line-height: 1.5; }
+  .genre-edit-card input { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+    font-size: 14px; font-family: inherit; outline: none; margin-bottom: 14px; }
+  .genre-edit-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .genre-edit-actions button { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit; }
+  .genre-edit-cancel { background: var(--accent-soft); color: #71705f; }
+  .genre-edit-save { background: var(--accent); color: #fff; }
 
   .today-story { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 24px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
@@ -203,7 +216,7 @@ const MOOD_BY_TIME = {
 
 const EXCLUDE_KEYWORDS = ['cover','커버','live','라이브','lyrics','가사','remix','리믹스','모음','compilation','1시간','mix','매시업','mashup','reaction','리액션','노래방','mr','inst'];
 
-const GENRES = [
+const DEFAULT_GENRES = [
   { id: 'classical', label: '클래식', icon: '\uD83C\uDFBB', queries: ['클래식 명곡', '오케스트라 연주곡', '바이올린 소나타'] },
   { id: 'piano', label: '피아노연주곡', icon: '\uD83C\uDFB9', queries: ['피아노 연주곡', '뉴에이지 피아노', '피아노 인스트루멘탈'] },
   { id: 'kpop', label: 'K-pop', icon: '\uD83C\uDFA4', queries: ['케이팝 히트곡', '아이돌 신곡 플레이리스트', 'K-pop 인기곡'] },
@@ -243,6 +256,7 @@ let state = {
   showOnlyOriginal: true, recommended: [], recommendLoading: false,
   forYou: [], forYouLoading: false,
   selectedGenre: null, genreRecommended: [], genreLoading: false,
+  genres: DEFAULT_GENRES.map(g => ({...g})),
   queue: [], currentIndex: -1, isPlaying: false, progress: 0, duration: 0,
   openDropdownId: null, npOpen: false, shuffle: false, repeat: false,
 };
@@ -251,7 +265,7 @@ const STORAGE_KEY = 'som2music_data_v2';
 function saveData() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      playlists: state.playlists, likes: state.likes, history: state.history, artistCount: state.artistCount,
+      playlists: state.playlists, likes: state.likes, history: state.history, artistCount: state.artistCount, genres: state.genres,
     }));
   } catch (e) {}
 }
@@ -264,6 +278,7 @@ function loadData() {
       if (Array.isArray(d.likes)) state.likes = d.likes;
       if (d.history) state.history = d.history;
       if (d.artistCount) state.artistCount = d.artistCount;
+      if (Array.isArray(d.genres) && d.genres.length) state.genres = d.genres;
     }
   } catch (e) {}
   if (state.playlists.length === 0) state.playlists = [{ id: 'pl_default1', name: '즐겨듣는 곡', tracks: [] }];
@@ -312,7 +327,7 @@ async function loadRecommended() {
 }
 
 async function loadGenreRecommended(genreId) {
-  const g = GENRES.find(x => x.id === genreId); if (!g) return;
+  const g = state.genres.find(x => x.id === genreId); if (!g) return;
   state.genreLoading = true; render();
   try {
     let all = [];
@@ -441,7 +456,7 @@ function render() {
     hc.innerHTML = `<h1 class="title">${state.mood.emoji} ${state.mood.label}</h1><p class="subtitle">오늘은 어떤 음악이 어울릴까요</p>`;
     ha.innerHTML = `<button class="refresh-btn" onclick="refreshRecommend()" aria-label="새로고침">↻</button>`;
   } else if (state.view === 'genre') {
-    const g = GENRES.find(x=>x.id===state.selectedGenre);
+    const g = state.genres.find(x=>x.id===state.selectedGenre);
     hc.innerHTML = `<h1 class="title-sm">${g?g.icon:''} ${g?esc(g.label):''}</h1><p class="subtitle">이 계열의 오늘의 추천</p>`;
   } else if (state.view === 'search') hc.innerHTML = `<h1 class="title-sm">검색</h1>`;
   else if (state.view === 'lists') hc.innerHTML = `<h1 class="title-sm">내 리스트</h1>`;
@@ -451,7 +466,8 @@ function render() {
   const main = document.getElementById('main'); let html = '';
 
   if (state.view === 'home') {
-    html += `<div class="genre-row">${GENRES.map(g=>`<button class="genre-chip" onclick="selectGenre('${g.id}')">${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
+    html += `<div class="genre-row">${state.genres.map((g,i)=>`<button class="genre-chip" data-idx="${i}">${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
+    html += `<div class="genre-hint">칩을 길게 누르면 다른 장르로 바꿀 수 있어요</div>`;
 
     const story = getTodayStory();
     html += `<section class="today-story"><div class="today-story-head">\uD83D\uDCC5 ${story.dateLabel}, 오늘의 이야기</div>`;
@@ -528,7 +544,48 @@ function render() {
     si.oninput = (e) => { state.searchInput = e.target.value; clearTimeout(si._t); si._t = setTimeout(()=>doSearch(), 600); };
     si.onkeydown = (e) => { if (e.key === 'Enter') doSearch(); };
   }
+  wireGenreChips();
   renderNav(); renderPlayerBar();
+}
+
+function wireGenreChips() {
+  document.querySelectorAll('.genre-chip').forEach((btn) => {
+    const idx = parseInt(btn.getAttribute('data-idx'), 10);
+    let timer = null, longPressed = false;
+    const start = () => { longPressed = false; clearTimeout(timer); timer = setTimeout(() => { longPressed = true; openGenreEditor(idx); }, 500); };
+    const cancel = () => { clearTimeout(timer); };
+    const end = () => { clearTimeout(timer); if (!longPressed) selectGenre(state.genres[idx].id); };
+    btn.addEventListener('touchstart', start, {passive:true});
+    btn.addEventListener('touchend', end);
+    btn.addEventListener('touchcancel', cancel);
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', end);
+    btn.addEventListener('mouseleave', cancel);
+  });
+}
+
+function openGenreEditor(idx) {
+  const g = state.genres[idx];
+  const overlay = document.createElement('div');
+  overlay.className = 'genre-edit-overlay';
+  overlay.innerHTML = `<div class="genre-edit-card">
+    <div class="genre-edit-title">"${esc(g.label)}" 대신 어떤 장르를 넣을까요?</div>
+    <input id="genre-edit-input" placeholder="예: 시티팝, 록, 발라드, 로파이">
+    <div class="genre-edit-actions"><button class="genre-edit-cancel" type="button">취소</button><button class="genre-edit-save" type="button">저장</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+  const inp = overlay.querySelector('#genre-edit-input'); inp.focus();
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('.genre-edit-cancel').onclick = close;
+  const save = () => {
+    const label = inp.value.trim();
+    if (!label) return;
+    state.genres[idx] = { id: 'custom_'+Date.now(), label, icon: '\uD83C\uDFB5', queries: [label, label+' 플레이리스트', label+' 추천곡'] };
+    saveData(); close(); render();
+  };
+  overlay.querySelector('.genre-edit-save').onclick = save;
+  inp.onkeydown = (e) => { if (e.key === 'Enter') save(); };
 }
 
 function trackRowHtml(t, active, onclick) {
