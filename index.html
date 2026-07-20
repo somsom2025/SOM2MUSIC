@@ -314,10 +314,10 @@ async function loadRecommended() {
   if (state.recommendLoading) return;
   state.recommendLoading = true; render();
   try {
-    const queries = shuffle(state.mood.queries).slice(0, 4);
+    const queries = shuffle(state.mood.queries).slice(0, 2);
     let all = [];
     for (const q of queries) {
-      try { all = all.concat((await searchYouTube(q, 10)).filter(t => t.likelyOriginal)); } catch (e) {}
+      try { all = all.concat((await searchYouTube(q, 15)).filter(t => t.likelyOriginal)); } catch (e) {}
     }
     const seen = new Set();
     const uniq = all.filter(t => (seen.has(t.id) ? false : (seen.add(t.id), true)));
@@ -331,8 +331,8 @@ async function loadGenreRecommended(genreId) {
   state.genreLoading = true; render();
   try {
     let all = [];
-    for (const q of g.queries) {
-      try { all = all.concat((await searchYouTube(q, 10)).filter(t => t.likelyOriginal)); } catch (e) {}
+    for (const q of g.queries.slice(0, 2)) {
+      try { all = all.concat((await searchYouTube(q, 15)).filter(t => t.likelyOriginal)); } catch (e) {}
     }
     const seen = new Set();
     const uniq = all.filter(t => (seen.has(t.id) ? false : (seen.add(t.id), true)));
