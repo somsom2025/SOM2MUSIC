@@ -1,4 +1,4 @@
-const CACHE = 'som2music-v8';
+const CACHE = 'som2music-v9';
 const ASSETS = [
   './',
   './index.html',

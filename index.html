@@ -60,8 +60,10 @@
 
   .genre-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 18px; -webkit-overflow-scrolling: touch; }
   .genre-row::-webkit-scrollbar { display: none; }
-  .genre-chip { flex-shrink: 0; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px;
-    font-weight: 600; padding: 9px 16px; border-radius: 20px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .genre-chip { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px;
+    font-weight: 600; padding: 8px 16px; border-radius: 16px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .genre-chip-situation { font-size: 10px; font-weight: 600; color: var(--muted); }
   .genre-chip:active { background: var(--accent-soft); border-color: var(--accent); }
   .genre-hint { font-size: 11px; color: var(--muted); margin: -10px 0 18px; }
 
@@ -216,13 +218,42 @@ const MOOD_BY_TIME = {
 
 const EXCLUDE_KEYWORDS = ['cover','커버','live','라이브','lyrics','가사','remix','리믹스','모음','compilation','1시간','mix','매시업','mashup','reaction','리액션','노래방','mr','inst'];
 
-const DEFAULT_GENRES = [
-  { id: 'classical', label: '클래식', icon: '\uD83C\uDFBB', queries: ['클래식 명곡', '오케스트라 연주곡', '바이올린 소나타'] },
-  { id: 'piano', label: '피아노연주곡', icon: '\uD83C\uDFB9', queries: ['피아노 연주곡', '뉴에이지 피아노', '피아노 인스트루멘탈'] },
-  { id: 'kpop', label: 'K-pop', icon: '\uD83C\uDFA4', queries: ['케이팝 히트곡', '아이돌 신곡 플레이리스트', 'K-pop 인기곡'] },
-  { id: 'jazz', label: '재즈', icon: '\uD83C\uDFB7', queries: ['재즈 스탠다드', '재즈 보컬', '스무스 재즈'] },
-  { id: 'bossa', label: '보사노바', icon: '\uD83C\uDFB8', queries: ['보사노바 연주곡', '브라질 재즈', '보사노바 보컬'] },
+// 상황별 장르 후보군. 매일 상황당 하나씩 랜덤으로 뽑혀서 그날의 장르 칩이 돼요.
+const SITUATIONS = [
+  { label: '공부할 때', icon: '\uD83D\uDCDA', options: [
+    { id: 'classical', label: '클래식', icon: '\uD83C\uDFBB', queries: ['클래식 명곡', '오케스트라 연주곡'] },
+    { id: 'lofi', label: '로파이', icon: '\uD83C\uDFA7', queries: ['로파이 힙합', '공부할 때 듣는 로파이'] },
+    { id: 'ambient', label: '앰비언트', icon: '\uD83C\uDF2B', queries: ['앰비언트 뮤직', '집중할 때 듣는 잔잔한 배경음악'] },
+  ]},
+  { label: '출퇴근', icon: '\uD83D\uDE87', options: [
+    { id: 'kpop', label: 'K-pop', icon: '\uD83C\uDFA4', queries: ['케이팝 히트곡', 'K-pop 인기곡'] },
+    { id: 'pop', label: '팝', icon: '\uD83C\uDFB6', queries: ['팝송 인기차트', '팝 플레이리스트'] },
+    { id: 'ballad', label: '발라드', icon: '\uD83C\uDF99\uFE0F', queries: ['발라드 명곡', '감성 발라드'] },
+  ]},
+  { label: '운동할 때', icon: '\uD83D\uDCAA', options: [
+    { id: 'edm', label: 'EDM', icon: '\uD83C\uDF9B\uFE0F', queries: ['EDM 플레이리스트', '신나는 EDM'] },
+    { id: 'hiphop', label: '힙합', icon: '\uD83C\uDFA7', queries: ['힙합 플레이리스트', '한국힙합 인기곡'] },
+    { id: 'trap', label: '트랩', icon: '\uD83D\uDD0A', queries: ['트랩 비트', 'trap music playlist'] },
+  ]},
+  { label: '쉬는 시간', icon: '\u2615', options: [
+    { id: 'jazz', label: '재즈', icon: '\uD83C\uDFB7', queries: ['재즈 스탠다드', '재즈 보컬'] },
+    { id: 'bossa', label: '보사노바', icon: '\uD83C\uDFB8', queries: ['보사노바 연주곡', '브라질 재즈'] },
+    { id: 'acoustic', label: '어쿠스틱', icon: '\uD83C\uDFB5', queries: ['어쿠스틱 플레이리스트', '잔잔한 통기타 연주'] },
+  ]},
 ];
+
+function todayKey() {
+  const now = new Date();
+  return `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+}
+function seededRandom(seed) { const x = Math.sin(seed) * 10000; return x - Math.floor(x); }
+function pickTodayGenres() {
+  const seedBase = parseInt(todayKey(), 10);
+  return SITUATIONS.map((s, i) => {
+    const idx = Math.floor(seededRandom(seedBase + i * 97) * s.options.length);
+    return { ...s.options[idx], situation: s.label, situationIcon: s.icon };
+  });
+}
 
 // 오늘과 관련된 역사적 사건 + 그 순간의 말. 'MM-DD' 형식으로 날짜를 추가하면 그날 이 이야기가 떠요.
 const TODAY_STORIES = {
@@ -256,7 +287,7 @@ let state = {
   showOnlyOriginal: true, recommended: [], recommendLoading: false,
   forYou: [], forYouLoading: false,
   selectedGenre: null, genreRecommended: [], genreLoading: false,
-  genres: DEFAULT_GENRES.map(g => ({...g})),
+  genres: pickTodayGenres(), genresDate: todayKey(), genreCache: {},
   queue: [], currentIndex: -1, isPlaying: false, progress: 0, duration: 0,
   openDropdownId: null, npOpen: false, shuffle: false, repeat: false,
 };
@@ -265,7 +296,8 @@ const STORAGE_KEY = 'som2music_data_v2';
 function saveData() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      playlists: state.playlists, likes: state.likes, history: state.history, artistCount: state.artistCount, genres: state.genres,
+      playlists: state.playlists, likes: state.likes, history: state.history, artistCount: state.artistCount,
+      genres: state.genres, genresDate: state.genresDate,
     }));
   } catch (e) {}
 }
@@ -278,7 +310,8 @@ function loadData() {
       if (Array.isArray(d.likes)) state.likes = d.likes;
       if (d.history) state.history = d.history;
       if (d.artistCount) state.artistCount = d.artistCount;
-      if (Array.isArray(d.genres) && d.genres.length) state.genres = d.genres;
+      if (Array.isArray(d.genres) && d.genresDate === todayKey()) { state.genres = d.genres; state.genresDate = d.genresDate; }
+      // 저장된 날짜가 오늘과 다르면 state 초기값(오늘자 랜덤 장르)을 그대로 사용
     }
   } catch (e) {}
   if (state.playlists.length === 0) state.playlists = [{ id: 'pl_default1', name: '즐겨듣는 곡', tracks: [] }];
@@ -337,12 +370,21 @@ async function loadGenreRecommended(genreId) {
     const seen = new Set();
     const uniq = all.filter(t => (seen.has(t.id) ? false : (seen.add(t.id), true)));
     state.genreRecommended = shuffle(uniq).slice(0, 7);
+    state.genreCache[genreId] = state.genreRecommended;
   } catch (e) { state.genreRecommended = []; }
   state.genreLoading = false; render();
 }
 function selectGenre(id) {
-  state.selectedGenre = id; state.view = 'genre'; state.genreRecommended = [];
+  state.selectedGenre = id; state.view = 'genre';
+  const cached = state.genreCache[id];
+  if (cached) { state.genreRecommended = cached; render(); return; }
+  state.genreRecommended = [];
   loadGenreRecommended(id); render();
+}
+function refreshGenre() {
+  if (!state.selectedGenre) return;
+  delete state.genreCache[state.selectedGenre];
+  loadGenreRecommended(state.selectedGenre);
 }
 
 async function loadForYou() {
@@ -457,7 +499,8 @@ function render() {
     ha.innerHTML = `<button class="refresh-btn" onclick="refreshRecommend()" aria-label="새로고침">↻</button>`;
   } else if (state.view === 'genre') {
     const g = state.genres.find(x=>x.id===state.selectedGenre);
-    hc.innerHTML = `<h1 class="title-sm">${g?g.icon:''} ${g?esc(g.label):''}</h1><p class="subtitle">이 계열의 오늘의 추천</p>`;
+    hc.innerHTML = `<h1 class="title-sm">${g?g.icon:''} ${g?esc(g.label):''}</h1><p class="subtitle">${g&&g.situation?esc(g.situation)+' · ':''}이 계열의 오늘의 추천</p>`;
+    ha.innerHTML = `<button class="refresh-btn" onclick="refreshGenre()" aria-label="새로고침">↻</button>`;
   } else if (state.view === 'search') hc.innerHTML = `<h1 class="title-sm">검색</h1>`;
   else if (state.view === 'lists') hc.innerHTML = `<h1 class="title-sm">내 리스트</h1>`;
   else if (state.view === 'listDetail') { const l = state.playlists.find(x=>x.id===state.activeListId); hc.innerHTML = `<h1 class="title-sm">${esc(l?l.name:'')}</h1>`; }
@@ -466,8 +509,8 @@ function render() {
   const main = document.getElementById('main'); let html = '';
 
   if (state.view === 'home') {
-    html += `<div class="genre-row">${state.genres.map((g,i)=>`<button class="genre-chip" data-idx="${i}">${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
-    html += `<div class="genre-hint">칩을 길게 누르면 다른 장르로 바꿀 수 있어요</div>`;
+    html += `<div class="genre-row">${state.genres.map((g,i)=>`<button class="genre-chip" data-idx="${i}"><span class="genre-chip-situation">${g.situationIcon||''} ${esc(g.situation||'')}</span>${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
+    html += `<div class="genre-hint">오늘의 상황별 추천이에요 · 길게 누르면 다른 장르로 바꿀 수 있어요</div>`;
 
     const story = getTodayStory();
     html += `<section class="today-story"><div class="today-story-head">\uD83D\uDCC5 ${story.dateLabel}, 오늘의 이야기</div>`;
