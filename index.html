@@ -67,18 +67,6 @@
   .genre-chip:active { background: var(--accent-soft); border-color: var(--accent); }
   .genre-hint { font-size: 11px; color: var(--muted); margin: -10px 0 18px; }
 
-  .genre-edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex;
-    align-items: center; justify-content: center; z-index: 200; padding: 24px; }
-  .genre-edit-card { background: var(--card); border-radius: 16px; padding: 20px; width: 100%; max-width: 320px; }
-  .genre-edit-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 14px; line-height: 1.5; }
-  .genre-edit-card input { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
-    font-size: 14px; font-family: inherit; outline: none; margin-bottom: 14px; }
-  .genre-edit-actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .genre-edit-actions button { border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px;
-    font-weight: 600; cursor: pointer; font-family: inherit; }
-  .genre-edit-cancel { background: var(--accent-soft); color: #71705f; }
-  .genre-edit-save { background: var(--accent); color: #fff; }
-
   .today-story { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 24px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
   .today-story-head { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
@@ -510,8 +498,8 @@ function render() {
   const main = document.getElementById('main'); let html = '';
 
   if (state.view === 'home') {
-    html += `<div class="genre-row">${state.genres.map((g,i)=>`<button class="genre-chip" data-idx="${i}"><span class="genre-chip-situation">${g.situationIcon||''} ${esc(g.situation||'')}</span>${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
-    html += `<div class="genre-hint">오늘의 상황별 추천이에요 · 길게 누르면 다른 장르로 바꿀 수 있어요</div>`;
+    html += `<div class="genre-row">${state.genres.map((g)=>`<button class="genre-chip" onclick="selectGenre('${g.id}')"><span class="genre-chip-situation">${g.situationIcon||''} ${esc(g.situation||'')}</span>${g.icon} ${esc(g.label)}</button>`).join('')}</div>`;
+    html += `<div class="genre-hint">오늘의 상황별 추천이에요</div>`;
 
     const story = getTodayStory();
     html += `<section class="today-story"><div class="today-story-head">\uD83D\uDCC5 ${story.dateLabel}, 오늘의 이야기</div>`;
@@ -588,48 +576,7 @@ function render() {
     si.oninput = (e) => { state.searchInput = e.target.value; clearTimeout(si._t); si._t = setTimeout(()=>doSearch(), 600); };
     si.onkeydown = (e) => { if (e.key === 'Enter') doSearch(); };
   }
-  wireGenreChips();
   renderNav(); renderPlayerBar();
-}
-
-function wireGenreChips() {
-  document.querySelectorAll('.genre-chip').forEach((btn) => {
-    const idx = parseInt(btn.getAttribute('data-idx'), 10);
-    let timer = null, longPressed = false;
-    const start = () => { longPressed = false; clearTimeout(timer); timer = setTimeout(() => { longPressed = true; openGenreEditor(idx); }, 500); };
-    const cancel = () => { clearTimeout(timer); };
-    const end = () => { clearTimeout(timer); if (!longPressed) selectGenre(state.genres[idx].id); };
-    btn.addEventListener('touchstart', start, {passive:true});
-    btn.addEventListener('touchend', end);
-    btn.addEventListener('touchcancel', cancel);
-    btn.addEventListener('mousedown', start);
-    btn.addEventListener('mouseup', end);
-    btn.addEventListener('mouseleave', cancel);
-  });
-}
-
-function openGenreEditor(idx) {
-  const g = state.genres[idx];
-  const overlay = document.createElement('div');
-  overlay.className = 'genre-edit-overlay';
-  overlay.innerHTML = `<div class="genre-edit-card">
-    <div class="genre-edit-title">"${esc(g.label)}" 대신 어떤 장르를 넣을까요?</div>
-    <input id="genre-edit-input" placeholder="예: 시티팝, 록, 발라드, 로파이">
-    <div class="genre-edit-actions"><button class="genre-edit-cancel" type="button">취소</button><button class="genre-edit-save" type="button">저장</button></div>
-  </div>`;
-  document.body.appendChild(overlay);
-  const inp = overlay.querySelector('#genre-edit-input'); inp.focus();
-  const close = () => overlay.remove();
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-  overlay.querySelector('.genre-edit-cancel').onclick = close;
-  const save = () => {
-    const label = inp.value.trim();
-    if (!label) return;
-    state.genres[idx] = { id: 'custom_'+Date.now(), label, icon: '\uD83C\uDFB5', queries: [label, label+' 플레이리스트', label+' 추천곡'] };
-    saveData(); close(); render();
-  };
-  overlay.querySelector('.genre-edit-save').onclick = save;
-  inp.onkeydown = (e) => { if (e.key === 'Enter') save(); };
 }
 
 function trackRowHtml(t, active, onclick) {
