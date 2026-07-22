@@ -221,24 +221,25 @@ const EXCLUDE_KEYWORDS = ['cover','커버','live','라이브','lyrics','가사',
 // 상황별 장르 후보군. 매일 상황당 하나씩 랜덤으로 뽑혀서 그날의 장르 칩이 돼요.
 const SITUATIONS = [
   { label: '공부할 때', icon: '\uD83D\uDCDA', options: [
-    { id: 'classical', label: '클래식', icon: '\uD83C\uDFBB', queries: ['클래식 명곡', '오케스트라 연주곡'] },
-    { id: 'lofi', label: '로파이', icon: '\uD83C\uDFA7', queries: ['로파이 힙합', '공부할 때 듣는 로파이'] },
-    { id: 'ambient', label: '앰비언트', icon: '\uD83C\uDF2B', queries: ['앰비언트 뮤직', '집중할 때 듣는 잔잔한 배경음악'] },
-  ]},
-  { label: '출퇴근', icon: '\uD83D\uDE87', options: [
     { id: 'kpop', label: 'K-pop', icon: '\uD83C\uDFA4', queries: ['케이팝 히트곡', 'K-pop 인기곡'] },
     { id: 'pop', label: '팝', icon: '\uD83C\uDFB6', queries: ['팝송 인기차트', '팝 플레이리스트'] },
+    { id: 'indie', label: '인디', icon: '\uD83C\uDFB8', queries: ['인디음악 추천', '인디밴드 플레이리스트'] },
+  ]},
+  { label: '출퇴근', icon: '\uD83D\uDE87', options: [
     { id: 'ballad', label: '발라드', icon: '\uD83C\uDF99\uFE0F', queries: ['발라드 명곡', '감성 발라드'] },
+    { id: 'acoustic_commute', label: '어쿠스틱', icon: '\uD83C\uDFB5', queries: ['어쿠스틱 플레이리스트', '잔잔한 통기타 연주'] },
+    { id: 'hiphop', label: '힙합', icon: '\uD83C\uDFA7', queries: ['힙합 플레이리스트', '한국힙합 인기곡'] },
   ]},
   { label: '운동할 때', icon: '\uD83D\uDCAA', options: [
-    { id: 'edm', label: 'EDM', icon: '\uD83C\uDF9B\uFE0F', queries: ['EDM 플레이리스트', '신나는 EDM'] },
-    { id: 'hiphop', label: '힙합', icon: '\uD83C\uDFA7', queries: ['힙합 플레이리스트', '한국힙합 인기곡'] },
+    { id: 'rock', label: '락', icon: '\uD83C\uDFB8', queries: ['락 명곡', '락 플레이리스트'] },
+    { id: 'dance', label: '댄스', icon: '\uD83D\uDC83', queries: ['댄스 팝 플레이리스트', '신나는 댄스곡'] },
     { id: 'trap', label: '트랩', icon: '\uD83D\uDD0A', queries: ['트랩 비트', 'trap music playlist'] },
   ]},
   { label: '쉬는 시간', icon: '\u2615', options: [
-    { id: 'jazz', label: '재즈', icon: '\uD83C\uDFB7', queries: ['재즈 스탠다드', '재즈 보컬'] },
     { id: 'bossa', label: '보사노바', icon: '\uD83C\uDFB8', queries: ['보사노바 연주곡', '브라질 재즈'] },
-    { id: 'acoustic', label: '어쿠스틱', icon: '\uD83C\uDFB5', queries: ['어쿠스틱 플레이리스트', '잔잔한 통기타 연주'] },
+    { id: 'acoustic_rest', label: '어쿠스틱', icon: '\uD83C\uDFB5', queries: ['어쿠스틱 플레이리스트', '잔잔한 통기타 연주'] },
+    { id: 'classical', label: '클래식', icon: '\uD83C\uDFBB', queries: ['클래식 명곡', '오케스트라 연주곡'] },
+    { id: 'jazz', label: '재즈', icon: '\uD83C\uDFB7', queries: ['재즈 스탠다드', '재즈 보컬'] },
   ]},
 ];
 
