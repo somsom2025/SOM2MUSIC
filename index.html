@@ -244,15 +244,35 @@ function pickTodayGenres() {
   });
 }
 
-// 오늘과 관련된 역사적 사건 + 그 순간의 말. 'MM-DD' 형식으로 날짜를 추가하면 그날 이 이야기가 떠요.
-const TODAY_STORIES = {
+// 건축 관련 오늘의 사건. 'MM-DD' 형식으로 날짜를 추가하면 그날 이 이야기가 우선적으로 떠요.
+const ARCH_EVENTS = {
+  '03-31': { event: '1889년 오늘, 파리에서 에펠탑이 프랑스 혁명 100주년을 기념해 정식으로 개장했어요. 엘리베이터가 미완성이라 구스타브 에펠은 1710개 계단을 직접 걸어 올라가 삼색기를 게양했죠.' },
+  '04-24': { event: '1893년 오늘, 약현성당(중림동성당)에서 종이 처음 울렸어요. 프랑스인 코스트 신부가 설계한 이 성당은 한국 최초의 서양식 벽돌 건축물로, 명동성당보다 5년 앞서 지어졌어요.' },
+  '05-01': { event: '1931년 오늘, 뉴욕의 엠파이어 스테이트 빌딩이 문을 열었어요. 착공한 지 1년 반 만에 완공되며 당시 세계에서 가장 높은 건물이 됐죠.' },
+  '10-20': { event: '1973년 오늘, 시드니 오페라 하우스가 엘리자베스 2세의 개관식과 함께 문을 열었어요. 건축가 예른 웃손이 설계한 조개껍질 모양 지붕은 이후 호주를 상징하는 건축물이 됐어요.' },
+  '04-21': { event: '1962년 오늘, 시애틀의 스페이스 니들이 세계박람회 개막을 앞두고 문을 열었어요. 건축가 존 그레이엄과 에드워드 칼슨이 함께 설계했죠.' },
+  '08-15': { event: '1995년 오늘, 경복궁 앞에 있던 옛 조선총독부 청사의 중앙돔 첨탑 철거를 시작으로 해체가 시작됐어요. 이듬해 11월 건물 전체가 완전히 사라지고, 그 자리엔 원래의 경복궁 모습이 복원됐죠.' },
+};
+// 건축 관련 사건이 없는 날 대신 보여줄 일반 역사적 사건. 'MM-DD' 형식.
+const GENERAL_EVENTS = {
   '07-19': {
     event: '1969년 오늘, 아폴로 11호가 달 궤도에 진입했어요. 사령선 조종사 마이클 콜린스는 홀로 궤도를 돌며 동료들이 착륙하기를 기다렸죠.',
     quote: '모두가 지켜보고 있다는 무게를 느꼈고, 그저 최선을 다하고 싶었다',
     author: '마이클 콜린스',
   },
 };
-// 오늘 날짜에 등록된 이야기가 없을 때 대신 보여줄 음악 관련 명언들
+// 사건 자체에 딸린 명언이 없을 때 우선적으로 쓰는 건축·집·도시 관련 명언
+const ARCH_QUOTES = [
+  { quote: '집은 살기 위한 기계다', author: '르 코르뷔지에' },
+  { quote: '형태는 기능을 따른다', author: '루이스 설리번' },
+  { quote: '의사는 실수를 땅에 묻지만, 건축가는 담쟁이를 심으라 권할 뿐이다', author: '프랭크 로이드 라이트' },
+  { quote: '적을수록 풍요롭다', author: '미스 반 데어 로에' },
+  { quote: '직선은 인간의 것이고, 곡선은 신의 것이다', author: '안토니 가우디' },
+  { quote: '우리가 건물을 만들고, 그 후엔 건물이 우리를 만든다', author: '윈스턴 처칠' },
+  { quote: '도시는 모두가 함께 만들 때에만 모두에게 무언가를 줄 수 있다', author: '제인 제이콥스' },
+  { quote: '각도가 360개나 되는데, 왜 하나에만 머물러야 하나', author: '자하 하디드' },
+];
+// 건축 명언마저 없을 때 마지막으로 쓰는 일반 명언
 const FALLBACK_QUOTES = [
   { quote: '음악은 인간 본성이 없어서는 안 될 즐거움을 준다', author: '공자' },
   { quote: '말로 표현할 수 없는 것을, 음악은 표현한다', author: '빅토르 위고' },
@@ -263,10 +283,25 @@ function getTodayStory() {
   const now = new Date();
   const key = String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   const dateLabel = `${now.getMonth()+1}월 ${now.getDate()}일`;
-  const s = TODAY_STORIES[key];
-  if (s) return { dateLabel, event: s.event, quote: s.quote, author: s.author };
-  const f = FALLBACK_QUOTES[now.getDate() % FALLBACK_QUOTES.length];
-  return { dateLabel, event: null, quote: f.quote, author: f.author };
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+
+  // 1순위: 건축 관련 사건, 2순위: 일반 역사적 사건
+  const chosen = ARCH_EVENTS[key] || GENERAL_EVENTS[key] || null;
+
+  let quote, author;
+  if (chosen && chosen.quote) {
+    // 사건에 직접 딸린 명언이 있으면 그걸 사용
+    quote = chosen.quote; author = chosen.author;
+  } else if (ARCH_QUOTES.length) {
+    // 없으면 건축·집·도시 관련 명언 중에서
+    const q = ARCH_QUOTES[dayOfYear % ARCH_QUOTES.length];
+    quote = q.quote; author = q.author;
+  } else {
+    // 그마저 없으면 일반 명언
+    const f = FALLBACK_QUOTES[now.getDate() % FALLBACK_QUOTES.length];
+    quote = f.quote; author = f.author;
+  }
+  return { dateLabel, event: chosen ? chosen.event : null, quote, author };
 }
 
 let state = {
